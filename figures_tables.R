@@ -43,7 +43,7 @@ word_cloud_mask <- png::readPNG(list.files(path="data",
 ## make wordcloud
 
 
-word_cloud <-   feedback %>%
+word_cloud <-feedback %>%
   #
   #clean up data
   #
@@ -59,12 +59,26 @@ word_cloud <-   feedback %>%
   mutate(benefits = str_replace_all(benefits, "and", "")) %>% #remove filler words and spaces
   mutate(benefits = str_squish(benefits))%>% #and spaces
   mutate(benefits = str_to_sentence(benefits)) %>% # make first word a capital
+  mutate(benefits = str_replace_all(benefits, c("Confidence-building"="Confidence",
+                                                "Engagement"="Engaging",
+                                                "Inspiration"="Inspiring",
+                                                "Learnful"="Learning",
+                                                "Learning new content"="Learning",
+                                                "Learning something new"="Learning",
+                                                "Learn new methodologies"= "Methodology",
+                                                "New methods"= "Methodology",
+                                                "Learning new skills"="Skills",
+                                                "Network"= "Networking",
+                                                "Networkinging"= "Networking",
+                                                "New tools"="Tools"))) %>%
   count(benefits) %>%
-  arrange(-n) %>%#put most common words in the middle
-  #
+  arrange(-n) #put most common words in the middle
+
+
+
   #turn into a word cloud
-  #
-  ggplot(
+
+plot <- ggplot( word_cloud,
   aes(label = benefits,
     size = n,
     color = benefits)) +
@@ -75,7 +89,7 @@ word_cloud <-   feedback %>%
   theme_minimal()+
   viridis::scale_color_viridis(discrete = T, option = "H")
 
-word_cloud
+plot
 
 ggsave("outputs/word_cloud.png", dpi = 300, bg = "white")
 
