@@ -70,7 +70,9 @@ word_cloud <-feedback %>%
                                                 "Learning new skills"="Skills",
                                                 "Network"= "Networking",
                                                 "Networkinging"= "Networking",
-                                                "New tools"="Tools"))) %>%
+                                                "New tools"="Tools",
+                                                "Ebfm knowledge"="EBFM knowledge",
+                                                "Understing"="Understanding"))) %>%
   count(benefits) %>%
   arrange(-n) #put most common words in the middle
 
