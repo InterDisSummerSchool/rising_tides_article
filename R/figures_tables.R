@@ -33,11 +33,11 @@ feedback <- read_csv(list.files(path="data",
                                recursive = T,
                                full.names = T)[1])
 
-word_cloud_mask <- png::readPNG(list.files(path="data",
-                                           pattern=word_cloud_mask_fl,
-                                           recursive = T,
-                                           full.names = T)[1],
-                                  native = T)
+# word_cloud_mask <- png::readPNG(list.files(path="data",
+#                                            pattern=word_cloud_mask_fl,
+#                                            recursive = T,
+#                                            full.names = T)[1],
+#                                   native = T)
 
 #######################################################################################
 ## make wordcloud
@@ -151,4 +151,66 @@ EBM_conf$before_after <- factor(EBM_conf$before_after, levels = c("confidence be
   plot
 
 ggsave("outputs/EBM_conf.png", dpi = 300, bg = "white")
+
+
+#######################################################################################
+## look at understanding of iea process
+
+feedback$`7. Which sections of the IEA do you feel most confident with? Please order`
+
+iea <- feedback %>%
+  rowid_to_column(var = "id") %>%
+  select(id, `7. Which sections of the IEA do you feel most confident with? Please order`) %>%
+  rename(iea = `7. Which sections of the IEA do you feel most confident with? Please order`) %>%
+  filter(!is.na(iea)) %>%
+  separate_longer_delim(cols = iea, delim = ",") %>%
+  mutate(confidence = row_number(), .by = id) %>%
+  add_count(iea, confidence)
+
+##plot
+
+ggplot(iea, aes(x = confidence, fill = iea))+
+  geom_bar()+
+  facet_wrap(~iea)+
+  scale_fill_brewer(palette = "Pastel2")+
+  labs(x = "Cconfidence in the sections of an IEA on a scale of 1 to 4", y = "Count")+
+  theme_minimal()+
+  ggplot2::theme(legend.position = "none", # position legend to the bottom
+                 panel.grid.minor = element_blank(), # remove grid lines on every second x-axis value
+                 axis.line = element_blank(), # remove all x-axis grid lines
+                 panel.grid.major.x = element_blank(), # remove the horizontal lines only on 1st , 3rd and 5 ... x-axis
+                 # plot.background = element_rect(color = "black", fill = NA),  # add border around the entire plot include legend
+                 plot.margin=grid::unit(c(4,4,4,4), "pt"),
+                 axis.text.x = element_text(size = 10 ),
+                 axis.text.y = element_text(size = 8 ),
+                 axis.title.x = element_text(size = 10 ),
+                 axis.title.y = element_text(size = 10 ))
+
+ggsave("outputs/IEA_conf1.png", dpi = 300, bg = "white")
+
+
+ggplot(iea, aes( x = iea, fill = iea))+
+  geom_bar()+
+  facet_wrap(~confidence)+
+  scale_fill_brewer(palette = "Pastel2")+
+  labs(x = "Sections of an IEA", y = "Count")+
+  theme_minimal()+
+  ggplot2::theme(legend.position = "none", # position legend to the bottom
+                 panel.grid.minor = element_blank(), # remove grid lines on every second x-axis value
+                 axis.line = element_blank(), # remove all x-axis grid lines
+                 panel.grid.major.x = element_blank(), # remove the horizontal lines only on 1st , 3rd and 5 ... x-axis
+                 # plot.background = element_rect(color = "black", fill = NA),  # add border around the entire plot include legend
+                 plot.margin=grid::unit(c(4,4,4,4), "pt"),
+                 axis.text.x = element_text(size = 10, angle = 90),
+                 axis.text.y = element_text(size = 8 ),
+                 axis.title.x = element_text(size = 10 ),
+                 axis.title.y = element_text(size = 10 ))
+
+
+ggsave("outputs/IEA_conf2.png", dpi = 300, bg = "white")
+
+
+
+
+
 
