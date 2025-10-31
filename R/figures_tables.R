@@ -72,7 +72,8 @@ word_cloud <-feedback %>%
                                                 "Networkinging"= "Networking",
                                                 "New tools"="Tools",
                                                 "Ebfm knowledge"="EBFM knowledge",
-                                                "Understing"="Understanding"))) %>%
+                                                "Understing"="Understanding",
+                                                "Getting to know people their stories"="Getting to know people and their stories"))) %>%
   count(benefits) %>%
   arrange(-n) #put most common words in the middle
 
@@ -89,7 +90,8 @@ plot <- ggplot( word_cloud,
   ) +
   scale_size_area(max_size = 40) +
   theme_minimal()+
-  viridis::scale_color_viridis(discrete = T, option = "H")
+  viridis::scale_color_viridis(discrete = T, option = "H")+
+  theme(plot.margin=grid::unit(c(2,2,2,2), "pt"))
 
 plot
 
@@ -109,8 +111,8 @@ EBM_conf <- feedback %>%
   #
   select(`3. Before the summer school, how confident would you have been in your abilities to conduct a project including EBM?`,
          `23. Now after the summer school, how confident are you in your abilities to conduct a project including EBM?`) %>%
-  rename(`confidence before InterDis2025` = `3. Before the summer school, how confident would you have been in your abilities to conduct a project including EBM?`,
-         `confidence after InterDis2025` = `23. Now after the summer school, how confident are you in your abilities to conduct a project including EBM?`) %>%
+  rename(`Confidence before InterDis2025` = `3. Before the summer school, how confident would you have been in your abilities to conduct a project including EBM?`,
+         `Confidence after InterDis2025` = `23. Now after the summer school, how confident are you in your abilities to conduct a project including EBM?`) %>%
   tidyr::pivot_longer(1:2, names_to = "before_after", values_to = "confidence")%>%
   count(before_after,confidence ) %>%
   dplyr::mutate(total = sum(n, na.rm = T), .by = before_after)%>%
@@ -123,13 +125,13 @@ EBM_conf <- feedback %>%
   arrange(confidence)
 
 # Reorder the factor to change bar order
-EBM_conf$before_after <- factor(EBM_conf$before_after, levels = c("confidence before InterDis2025", "confidence after InterDis2025"))
+EBM_conf$before_after <- factor(EBM_conf$before_after, levels = c("Confidence before InterDis2025", "Confidence after InterDis2025"))
 
   plot <- ggplot2::ggplot(EBM_conf, aes(y = percentage, x = confidence, fill = before_after)) +
     ggplot2::geom_bar(stat = "identity", position = position_dodge(width = 0.9, preserve = "single")) +
     ggplot2::scale_fill_brewer(palette = "Paired")+  # order the colours of the bars in the reversed order
-    ggplot2::ylab("TBA") +
-    ggplot2::xlab("TBA") + ## remove the heading for the y-axis
+    ggplot2::ylab("Percentage of participants") +
+    ggplot2::xlab("Confidence in abilities to conduct a project including EBM") + ## remove the heading for the y-axis
     ggplot2::guides(fill = guide_legend(reverse = F, nrow = 1, size = 0.5)) +  # display legend in 2 rows
     ggplot2::labs(fill = "") + ## change the legend title here
     ggplot2::scale_y_continuous(labels = function(x) paste0(x, "%"), breaks = c(0,20,  40, 60, 80,  100)) + # set the y-axis to show 0%, 50%, and 100%
