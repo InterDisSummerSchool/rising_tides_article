@@ -175,7 +175,7 @@ ggplot(iea, aes(x = confidence, fill = iea))+
   geom_bar()+
   facet_wrap(~iea)+
   scale_fill_brewer(palette = "Pastel2")+
-  labs(x = "Cconfidence in the sections of an IEA on a scale of 1 to 4", y = "Count")+
+  labs(x = "Confidence in the sections of an IEA on a scale of 1 to 4", y = "Count")+
   theme_minimal()+
   ggplot2::theme(legend.position = "none", # position legend to the bottom
                  panel.grid.minor = element_blank(), # remove grid lines on every second x-axis value
@@ -212,7 +212,124 @@ ggplot(iea, aes( x = iea, fill = iea))+
 ggsave("outputs/IEA_conf2.png", dpi = 300, bg = "white")
 
 
+#######################################################################################
+## look at most valuable part of the school
 
+feedback$`14. We understand that the Summer School had a full program. How did you experience the pace? Please select the best that applies to you`
+
+value <- feedback %>%
+  rowid_to_column(var = "id") %>%
+  select(id, `13. Rank in order of importance: What do you feel you got the most out of?`) %>%
+  rename(value = `13. Rank in order of importance: What do you feel you got the most out of?`) %>%
+  filter(!is.na(value)) %>%
+  separate_longer_delim(cols = value, delim = ",") %>%
+  mutate(worth = row_number(), .by = id)%>%
+  add_count(value, worth) %>%
+  select(-id) %>%
+  distinct()%>%
+  mutate(worth = case_match(worth, 1 ~ 5,
+                                          2 ~ 4,
+                                          3 ~ 3,
+                                          4 ~ 2,
+                                          5 ~ 1)) %>%
+  mutate(sum = worth*n) %>%
+  mutate(total = sum(sum), .by = value) %>%
+  mutate(ave = total/4)%>%
+  select(value, ave) %>%
+  distinct() %>%
+  mutate(ave = (ave/32)*100) %>%
+  arrange(ave) %>%
+  mutate(value=factor(value, levels=value))
+
+##plot
+
+ggplot(value, aes(x = ave, y = value, fill = value))+
+  geom_col()+
+  scale_fill_brewer(palette = "Paired")+
+  labs(x = "Average percieved worth of the activity out of a possible score of 100", y = "Activities")+
+  theme_minimal()+
+  ggplot2::theme(legend.position = "none", # position legend to the bottom
+                 panel.grid.minor = element_blank(), # remove grid lines on every second x-axis value
+                 axis.line = element_blank(), # remove all x-axis grid lines
+                 panel.grid.major.x = element_blank(), # remove the horizontal lines only on 1st , 3rd and 5 ... x-axis
+                 # plot.background = element_rect(color = "black", fill = NA),  # add border around the entire plot include legend
+                 plot.margin=grid::unit(c(4,4,4,4), "pt"),
+                 axis.text.x = element_text(size = 10 ),
+                 axis.text.y = element_text(size = 8 ),
+                 axis.title.x = element_text(size = 10 ),
+                 axis.title.y = element_text(size = 10 ))
+
+
+
+ggsave("outputs/activity_worth_ave.png", dpi = 300, bg = "white")
+
+
+
+####################################################################################
+##alternative value
+value <- feedback %>%
+  rowid_to_column(var = "id") %>%
+  select(id, `13. Rank in order of importance: What do you feel you got the most out of?`) %>%
+  rename(value = `13. Rank in order of importance: What do you feel you got the most out of?`) %>%
+  filter(!is.na(value)) %>%
+  separate_longer_delim(cols = value, delim = ",") %>%
+  mutate(worth = row_number(), .by = id)%>%
+  add_count(value, worth) %>%
+  select(-id) %>%
+  distinct()%>%
+  mutate(worth = case_match(worth, 1 ~ 5,
+                            2 ~ 4,
+                            3 ~ 3,
+                            4 ~ 2,
+                            5 ~ 1)) %>%
+  mutate(sum = worth*n) %>%
+  mutate(total = sum(sum), .by = value) %>%
+  mutate(ave = total/4)%>%
+  select(value, ave) %>%
+  distinct() %>%
+  mutate(ave = (ave/32)*100) %>%
+  arrange(ave) %>%
+  mutate(value=factor(value, levels=value))
+
+##plot
+
+ggplot(value, aes(x = ave, y = value, fill = value))+
+  geom_col()+
+  scale_fill_brewer(palette = "Paired")+
+  labs(x = "Average percieved worth of the activity out of a possible score of 100", y = "Activities")+
+  theme_minimal()+
+  ggplot2::theme(legend.position = "none", # position legend to the bottom
+                 panel.grid.minor = element_blank(), # remove grid lines on every second x-axis value
+                 axis.line = element_blank(), # remove all x-axis grid lines
+                 panel.grid.major.x = element_blank(), # remove the horizontal lines only on 1st , 3rd and 5 ... x-axis
+                 # plot.background = element_rect(color = "black", fill = NA),  # add border around the entire plot include legend
+                 plot.margin=grid::unit(c(4,4,4,4), "pt"),
+                 axis.text.x = element_text(size = 10 ),
+                 axis.text.y = element_text(size = 8 ),
+                 axis.title.x = element_text(size = 10 ),
+                 axis.title.y = element_text(size = 10 ))
+
+
+
+ggsave("outputs/activity_worth_ave.png", dpi = 300, bg = "white")
+
+
+
+#######################################################################################
+## make a bar graph on before and after EBM confidence
+
+
+
+pace <- feedback %>%
+  #
+  #clean up and prep data
+  #
+  select(`14. We understand that the Summer School had a full program. How did you experience the pace? Please select the best that applies to you`) %>%
+  rename(pace = `14. We understand that the Summer School had a full program. How did you experience the pace? Please select the best that applies to you`)%>%
+  count(pace)
+
+
+ggsave("outputs/EBM_conf.png", dpi = 300, bg = "white")
 
 
 
