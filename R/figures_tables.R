@@ -23,7 +23,7 @@ library(ggwordcloud)
 
 feedback_fl <- "^InterDisAttendee_Feedback.csv$"
 
-word_cloud_mask_fl <- "^word_cloud_mask.png$"
+part_info_fl <- "^InterDis25ParticipantInfo.csv$"
 
 #######################################################################################
 ## load data
@@ -33,13 +33,35 @@ feedback <- read_csv(list.files(path="data",
                                recursive = T,
                                full.names = T)[1])
 
-# word_cloud_mask <- png::readPNG(list.files(path="data",
-#                                            pattern=word_cloud_mask_fl,
-#                                            recursive = T,
-#                                            full.names = T)[1],
-#                                   native = T)
+
+part_info <- read_csv(list.files(path="data",
+                                pattern=part_info_fl,
+                                recursive = T,
+                                full.names = T)[1])
 
 #######################################################################################
+##bar graph of field of study of participants
+
+part_info %>%
+  count(field_of_study)%>%
+ggplot(aes(x = n, y = reorder(field_of_study, n)))+
+  geom_col( colour = "#A6CEE3", fill = "#A6CEE3")+
+  labs(x = "Number of participants", y = "")+
+  scale_x_continuous(breaks=seq(0,10,by=2))+
+  theme_minimal()+
+  ggplot2::theme(legend.position = "none", # position legend to the bottom
+                 panel.grid.minor = element_blank(), # remove grid lines on every second x-axis value
+                 axis.line = element_blank(), # remove all x-axis grid lines
+                 panel.grid.major.x = element_blank(), # remove the horizontal lines only on 1st , 3rd and 5 ... x-axis
+                 # plot.background = element_rect(color = "black", fill = NA),  # add border around the entire plot include legend
+                 plot.margin=grid::unit(c(4,4,4,4), "pt"),
+                 axis.text.y = element_text(size = 8 ),
+                 axis.title.x = element_text(size = 10 ),
+                 axis.title.y = element_text(size = 10 ))
+
+ggsave("outputs/field_of_study.png", width = 8, height = 4, dpi = 300, bg = "white")
+
+##################################################################################
 ## make wordcloud
 
 
@@ -111,8 +133,8 @@ EBM_conf <- feedback %>%
   #
   select(`3. Before the summer school, how confident would you have been in your abilities to conduct a project including EBM?`,
          `23. Now after the summer school, how confident are you in your abilities to conduct a project including EBM?`) %>%
-  rename(`Confidence before InterDis2025` = `3. Before the summer school, how confident would you have been in your abilities to conduct a project including EBM?`,
-         `Confidence after InterDis2025` = `23. Now after the summer school, how confident are you in your abilities to conduct a project including EBM?`) %>%
+  rename(`Confidence level before InterDis2025` = `3. Before the summer school, how confident would you have been in your abilities to conduct a project including EBM?`,
+         `Confidence level after InterDis2025` = `23. Now after the summer school, how confident are you in your abilities to conduct a project including EBM?`) %>%
   tidyr::pivot_longer(1:2, names_to = "before_after", values_to = "confidence")%>%
   count(before_after,confidence ) %>%
   dplyr::mutate(total = sum(n, na.rm = T), .by = before_after)%>%
@@ -125,7 +147,7 @@ EBM_conf <- feedback %>%
   arrange(confidence)
 
 # Reorder the factor to change bar order
-EBM_conf$before_after <- factor(EBM_conf$before_after, levels = c("Confidence before InterDis2025", "Confidence after InterDis2025"))
+EBM_conf$before_after <- factor(EBM_conf$before_after, levels = c("Confidence level before InterDis2025", "Confidence level after InterDis2025"))
 
   plot <- ggplot2::ggplot(EBM_conf, aes(y = percentage, x = confidence, fill = before_after)) +
     ggplot2::geom_bar(stat = "identity", position = position_dodge(width = 0.9, preserve = "single")) +
@@ -152,7 +174,7 @@ EBM_conf$before_after <- factor(EBM_conf$before_after, levels = c("Confidence be
 
   plot
 
-ggsave("outputs/EBM_conf.png", dpi = 300, bg = "white")
+ggsave("outputs/EBM_conf.png",width = 8, height = 5, dpi = 300, bg = "white")
 
 
 #######################################################################################
@@ -261,7 +283,7 @@ ggplot(value, aes(x = ave, y = value, fill = value))+
 
 
 
-ggsave("outputs/activity_worth_ave.png", dpi = 300, bg = "white")
+ggsave("outputs/activity_worth_ave.png", width = 8, height = 4, dpi = 300, bg = "white")
 
 
 
